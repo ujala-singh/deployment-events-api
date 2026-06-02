@@ -31,10 +31,38 @@ deployment events.
 The UI is a single static page (no build step) served by the same FastAPI app;
 it talks to the JSON API below via `fetch`, so one command runs everything.
 
+### Alternative: plain `venv` + `pip` (without uv)
+
+Prefer the standard toolchain? Use a Python **3.11+** interpreter (the code uses
+`StrEnum` and modern typing):
+
+```bash
+# Create and activate a virtual environment
+python3 -m venv .venv
+source .venv/bin/activate            # Windows: .venv\Scripts\activate
+
+# Install the app (runtime deps) — plus dev tools for tests/lint
+pip install -e .
+pip install pytest httpx ruff
+
+# Run the server
+uvicorn deployment_events_api.main:app --reload
+```
+
+> `uv` remains the recommended path: it provisions the right Python
+> automatically and installs from the pinned `uv.lock` for reproducible builds.
+
 ## Run the tests
 
 ```bash
-uv run pytest
+uv run pytest          # or just `pytest` with the venv activated
+```
+
+Linting and formatting use [ruff](https://docs.astral.sh/ruff/):
+
+```bash
+uv run ruff check .            # lint
+uv run ruff format --check .   # verify formatting
 ```
 
 ## Endpoints
