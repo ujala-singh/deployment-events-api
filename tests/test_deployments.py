@@ -29,6 +29,7 @@ def test_ui_shell_served_at_root(client: TestClient) -> None:
 def test_static_assets_served(client: TestClient) -> None:
     assert client.get("/static/app.js").status_code == 200
     assert client.get("/static/styles.css").status_code == 200
+    assert client.get("/static/logo.svg").status_code == 200
 
 
 def test_list_returns_all_seed_events(client: TestClient) -> None:

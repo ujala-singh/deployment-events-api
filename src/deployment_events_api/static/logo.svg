@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Deployment Events logo">
+  <defs>
+    <linearGradient id="deployGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5b9dff"/>
+      <stop offset="1" stop-color="#3358e0"/>
+    </linearGradient>
+  </defs>
+  <rect x="1" y="1" width="30" height="30" rx="8" fill="url(#deployGradient)"/>
+  <!-- Upward "deploy / ship" arrow -->
+  <path d="M16 6.5 L23.5 16 H18.75 V21.5 H13.25 V16 H8.5 Z" fill="#ffffff"/>
+  <!-- Launch-pad base line -->
+  <rect x="11" y="23.5" width="10" height="2.5" rx="1.25" fill="#ffffff" opacity="0.85"/>
+</svg>

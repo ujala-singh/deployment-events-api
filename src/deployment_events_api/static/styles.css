@@ -31,7 +31,18 @@ body {
   border-bottom: 1px solid var(--border);
   background: var(--panel);
 }
-.topbar h1 { font-size: 18px; margin: 0; font-weight: 600; }
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--text);
+  border-radius: 8px;
+}
+.brand:hover h1 { color: var(--accent); }
+.brand:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.logo { display: block; flex: none; }
+.topbar h1 { font-size: 18px; margin: 0; font-weight: 600; transition: color 0.12s ease; }
 .docs-link { color: var(--muted); text-decoration: none; font-size: 13px; }
 .docs-link:hover { color: var(--accent); }
 
