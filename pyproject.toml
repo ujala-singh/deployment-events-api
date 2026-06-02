@@ -17,6 +17,7 @@ deployment-events-api = "deployment_events_api.main:main"
 dev = [
     "pytest>=8.3.0",
     "httpx>=0.27.0",
+    "ruff>=0.6.0",
 ]
 
 [build-system]
@@ -34,3 +35,12 @@ artifacts = [
 [tool.pytest.ini_options]
 addopts = "-q"
 testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+# pycodestyle, pyflakes, isort, pyupgrade, flake8-bugbear, comprehensions.
+select = ["E", "F", "I", "UP", "B", "C4", "W"]

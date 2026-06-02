@@ -61,13 +61,10 @@ def test_filter_by_status(client: TestClient) -> None:
 
 
 def test_combined_filters(client: TestClient) -> None:
-    resp = client.get(
-        "/deployments", params={"service": "billing-api", "status": "failed"}
-    )
+    resp = client.get("/deployments", params={"service": "billing-api", "status": "failed"})
     assert resp.status_code == 200
     assert all(
-        d["service"] == "billing-api" and d["status"] == "failed"
-        for d in resp.json()["data"]
+        d["service"] == "billing-api" and d["status"] == "failed" for d in resp.json()["data"]
     )
 
 

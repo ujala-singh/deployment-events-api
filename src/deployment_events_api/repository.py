@@ -19,7 +19,7 @@ class DeploymentRepository:
             self._by_id[deployment.id] = deployment
 
     @classmethod
-    def with_seed_data(cls) -> "DeploymentRepository":
+    def with_seed_data(cls) -> DeploymentRepository:
         return cls(seed_deployments())
 
     def get(self, deployment_id: str) -> Deployment | None:
