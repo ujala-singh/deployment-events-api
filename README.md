@@ -90,6 +90,14 @@ curl "http://127.0.0.1:8000/deployments?service=billing-api&status=failed"
 {
   "data": [
     {
+      "id": "deploy_038",
+      "service": "billing-api",
+      "status": "failed",
+      "duration": 305,
+      "timestamp": "2025-05-14T17:09:00Z",
+      "commit_sha": "f6adf6e"
+    },
+    {
       "id": "deploy_014",
       "service": "billing-api",
       "status": "failed",
@@ -98,7 +106,7 @@ curl "http://127.0.0.1:8000/deployments?service=billing-api&status=failed"
       "commit_sha": "7e25d6e"
     }
   ],
-  "count": 1
+  "count": 2
 }
 ```
 
