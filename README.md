@@ -25,6 +25,9 @@ deployment events.
 
 - **Web UI**: http://127.0.0.1:8000/ — lists all deployments with service/status
   filters; click any deployment ID to view its details.
+- **Compare view**: http://127.0.0.1:8000/d/compare — pick two deployments of the
+  same service and see a structured diff. Deep-linkable, e.g.
+  `/d/compare?from=deploy_009&to=deploy_014`.
 - Interactive docs (Swagger UI): http://127.0.0.1:8000/docs
 - OpenAPI schema: http://127.0.0.1:8000/openapi.json
 
@@ -72,6 +75,7 @@ uv run ruff format --check .   # verify formatting
 | `GET`  | `/health`             | Liveness check.                               |
 | `GET`  | `/deployments`        | List deployments (filterable, newest first).  |
 | `GET`  | `/deployments/{id}`   | Fetch a single deployment by id.              |
+| `GET`  | `/compare`            | Diff two deployments of the same service.     |
 
 ### `GET /deployments`
 
@@ -127,6 +131,54 @@ curl http://127.0.0.1:8000/deployments/deploy_001
 }
 ```
 
+### `GET /compare`
+
+Diffs two deployments **of the same service**. Both query params are required.
+
+| Param  | Example      | Notes                          |
+| ------ | ------------ | ------------------------------ |
+| `from` | `deploy_009` | Base (earlier) deployment id.  |
+| `to`   | `deploy_014` | Target (later) deployment id.  |
+
+```bash
+curl "http://127.0.0.1:8000/compare?from=deploy_009&to=deploy_014"
+```
+
+Returns what changed, a performance verdict, and service patterns scoped to the
+time window **between** the two deployments:
+
+```json
+{
+  "service": "billing-api",
+  "base":   { "id": "deploy_009", "status": "success", "duration": 134, "...": "..." },
+  "target": { "id": "deploy_014", "status": "failed",  "duration": 320, "...": "..." },
+  "changes": {
+    "commit_changed": true,
+    "status_transition": { "from": "success", "to": "failed", "changed": true },
+    "duration_delta": 186,
+    "changed_fields": ["commit_sha", "status", "duration"]
+  },
+  "performance": {
+    "verdict": "degraded",
+    "duration_delta": 186,
+    "pct_change": 138.8,
+    "reason": "Target is 186s slower than base."
+  },
+  "service_patterns": {
+    "total_deployments": 2,
+    "bad_release_rate_pct": 50.0,
+    "deployment_frequency_pct": 33.3
+  }
+}
+```
+
+- **`performance.verdict`** is `improved` / `degraded` / `unchanged`, or `unknown`
+  when either deployment is `in_progress`/`cancelled` (no measurable duration).
+- **`service_patterns`** count only deployments in the inclusive window between
+  `from` and `to`; `deployment_frequency_pct` is the service's share of *fleet*
+  deployments in that same window.
+- Comparing different services, or a deployment with itself, returns `400`.
+
 ## Responses & errors
 
 - List responses are wrapped in an envelope: `{ "data": [...], "count": N }`.
@@ -140,6 +192,7 @@ curl http://127.0.0.1:8000/deployments/deploy_001
 | Situation                           | Status | `error.code`       |
 | ----------------------------------- | ------ | ------------------ |
 | Resource fetched / list returned    | `200`  | —                  |
+| Invalid combination (diff service)  | `400`  | `bad_request`      |
 | Unknown deployment id               | `404`  | `not_found`        |
 | Invalid query value (e.g. `status`) | `422`  | `validation_error` |
 
@@ -150,15 +203,18 @@ src/deployment_events_api/
   main.py            # app factory, error handlers, static UI mount, entry point
   models.py          # Pydantic schemas + status enum
   repository.py      # in-memory store + filtering/query logic
+  comparison.py      # pure diff logic backing /compare
   seed.py            # loads seed events from data/ at runtime
   dependencies.py    # repository injection
   data/
     seed_deployments.json  # 45 mock deployment events (editable, no code change)
   routers/
     deployments.py   # /deployments routes
-  static/            # browser UI (index.html, app.js, styles.css)
+    comparisons.py   # /compare route
+  static/            # browser UI: list, detail, and /d/compare views
 tests/
   test_deployments.py
+  test_compare.py
 ```
 
 The `DeploymentRepository` is the single seam between the API and storage —

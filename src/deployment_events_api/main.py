@@ -12,7 +12,7 @@ from fastapi.staticfiles import StaticFiles
 from . import __version__
 from .models import ErrorResponse
 from .repository import DeploymentRepository
-from .routers import deployments
+from .routers import comparisons, deployments
 
 _STATIC_DIR = Path(__file__).parent / "static"
 
@@ -69,12 +69,18 @@ def create_app() -> FastAPI:
         return {"status": "ok", "version": __version__}
 
     app.include_router(deployments.router)
+    app.include_router(comparisons.router)
 
     # Serve the browser UI: assets under /static, the SPA shell at /.
     app.mount("/static", StaticFiles(directory=_STATIC_DIR), name="static")
 
     @app.get("/", include_in_schema=False)
     def ui() -> FileResponse:
+        return FileResponse(_STATIC_DIR / "index.html")
+
+    # Client-routed compare view; served by the same SPA shell.
+    @app.get("/d/compare", include_in_schema=False)
+    def ui_compare() -> FileResponse:
         return FileResponse(_STATIC_DIR / "index.html")
 
     return app
